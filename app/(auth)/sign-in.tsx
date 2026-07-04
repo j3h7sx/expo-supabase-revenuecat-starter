@@ -16,6 +16,11 @@ import { Screen } from "@/src/components/Screen";
 import { isSupabaseConfigured } from "@/src/config/env";
 import { supabase } from "@/src/data/supabase/client";
 import { useAuth } from "@/src/providers/auth-provider";
+import {
+  getGoogleIdToken,
+  isGoogleSignInCancelled,
+  isGoogleSignInConfigured,
+} from "@/src/services/google-auth-service";
 import { colors, radius, spacing } from "@/src/theme";
 
 export default function SignInScreen() {
@@ -117,6 +122,53 @@ export default function SignInScreen() {
     }
   }
 
+  async function signInWithGoogle() {
+    if (!isSupabaseConfigured()) {
+      Alert.alert(
+        "Missing Supabase env",
+        "Fill EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env."
+      );
+      return;
+    }
+
+    if (!isGoogleSignInConfigured()) {
+      Alert.alert(
+        "Missing Google env",
+        "Fill EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID and EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME in .env."
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const idToken = await getGoogleIdToken();
+
+      if (!idToken) {
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithIdToken({
+        provider: "google",
+        token: idToken,
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      if (isGoogleSignInCancelled(error)) {
+        return;
+      }
+
+      Alert.alert(
+        "Google Sign-In failed",
+        error instanceof Error ? error.message : String(error)
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <Screen>
       <KeyboardAvoidingView
@@ -163,6 +215,12 @@ export default function SignInScreen() {
             disabled={loading}
             onPress={signInWithApple}
             title="Continue with Apple"
+            variant="secondary"
+          />
+          <Button
+            disabled={loading}
+            onPress={signInWithGoogle}
+            title="Continue with Google"
             variant="secondary"
           />
         </View>

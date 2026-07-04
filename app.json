@@ -19,7 +19,13 @@
       "expo-router",
       "expo-apple-authentication",
       "expo-secure-store",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.your-reversed-ios-client-id"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

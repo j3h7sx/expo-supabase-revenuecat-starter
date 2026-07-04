@@ -6,7 +6,7 @@ It includes:
 
 - Expo Router + TypeScript
 - Supabase auth, profiles, onboarding state, RLS
-- Apple Sign-In and email/password auth
+- Apple, Google, and email/password auth
 - MMKV-backed local persistence
 - Data-driven onboarding examples
 - Superwall paywall placements
@@ -35,6 +35,9 @@ Fill `.env`:
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=
 EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME=com.googleusercontent.apps.your-reversed-ios-client-id
 EXPO_PUBLIC_SUPERWALL_IOS_API_KEY=
 EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=
 EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID=pro
@@ -52,6 +55,7 @@ This starter does not run in Expo Go as-is.
 
 It includes native SDKs that are not bundled with Expo Go:
 
+- `@react-native-google-signin/google-signin`
 - `react-native-purchases` for RevenueCat
 - `expo-superwall`
 - `react-native-mmkv`
@@ -71,6 +75,44 @@ bun run start
 ```
 
 Then open the project from the development build, not Expo Go. JavaScript changes will load from Metro into the installed dev build.
+
+## Auth
+
+The starter includes three sign-in options:
+
+- Email/password through Supabase
+- Apple Sign-In through Supabase
+- Google Sign-In through Supabase
+
+### Google Sign-In Setup
+
+Create Google OAuth client IDs in Google Cloud:
+
+- iOS OAuth client ID for the app bundle ID in `app.json`
+- Web OAuth client ID for server-side token verification
+
+Fill these values in `.env`:
+
+```bash
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=your-ios-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME=com.googleusercontent.apps.your-reversed-ios-client-id
+```
+
+The iOS URL scheme is the reversed iOS client ID. For example:
+
+```text
+Client ID: 1234567890-abc.apps.googleusercontent.com
+URL scheme: com.googleusercontent.apps.1234567890-abc
+```
+
+Enable Google as an auth provider in Supabase and paste the Google client credentials there too. The app calls `supabase.auth.signInWithIdToken({ provider: "google", token })` after Google returns an ID token.
+
+After changing `EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME`, rebuild the development build:
+
+```bash
+eas build --profile development --platform ios
+```
 
 ## Supabase
 
@@ -126,7 +168,7 @@ Choice answers persist locally with Zustand/MMKV and sync to `onboarding_respons
 ## Important Files
 
 - `app/_layout.tsx` - root providers and navigation
-- `app/(auth)/sign-in.tsx` - Apple + email auth
+- `app/(auth)/sign-in.tsx` - Apple + Google + email auth
 - `app/(onboarding)/[step].tsx` - generic onboarding renderer
 - `app/(app)/index.tsx` - example locked app screen
 - `src/providers/revenuecat-superwall-provider.tsx` - purchase bridge
@@ -135,4 +177,4 @@ Choice answers persist locally with Zustand/MMKV and sync to `onboarding_respons
 
 ## iOS-First Notes
 
-This starter intentionally omits Android setup and Google Sign-In. Add those after the iOS flow works end to end.
+This starter is intentionally iOS-first. Android support can be added later by adding Android package IDs, Google Android OAuth credentials, RevenueCat Android keys, and Superwall Android keys.

@@ -5,6 +5,12 @@ function readPublicEnv(name: string, fallback = "") {
 export const env = {
   supabaseUrl: readPublicEnv("EXPO_PUBLIC_SUPABASE_URL"),
   supabaseAnonKey: readPublicEnv("EXPO_PUBLIC_SUPABASE_ANON_KEY"),
+  googleWebClientId: readPublicEnv("EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID"),
+  googleIosClientId: readPublicEnv("EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID"),
+  googleIosUrlScheme: readPublicEnv(
+    "EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME",
+    "com.googleusercontent.apps.your-reversed-ios-client-id"
+  ),
   superwallIosApiKey: readPublicEnv("EXPO_PUBLIC_SUPERWALL_IOS_API_KEY"),
   superwallOnboardingPlacement: readPublicEnv(
     "EXPO_PUBLIC_SUPERWALL_ONBOARDING_PLACEMENT",
